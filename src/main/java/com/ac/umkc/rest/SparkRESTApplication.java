@@ -37,6 +37,14 @@ public class SparkRESTApplication extends SpringBootServletInitializer {
     
     System.out.println ("My SparkSession appears to be live...");
     
+    try {
+      System.out.println ("I'm trying to read in the user");
+      sparkSession.read().textFile("hdfs:///proj2/userdata.txt");
+      System.out.println ("I could read it");
+    } catch (Throwable t) {
+      System.out.println ("Something didn't work...");
+      t.printStackTrace();
+    }
     
     SpringApplication.run(SparkRESTApplication.class, args);
   }
