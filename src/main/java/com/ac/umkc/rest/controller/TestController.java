@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import scala.Serializable;
 import scala.Tuple2;
 
 import com.ac.umkc.rest.SparkRESTApplication;
@@ -25,8 +26,11 @@ import com.ac.umkc.spark.util.TupleSorter;
  */
 @RestController
 @RequestMapping("/test")
-public class TestController {
+public class TestController implements Serializable {
   
+  /** Gotta have it */
+  private static final long serialVersionUID = -227649608200738094L;
+
   /**
    * 
    * @return
