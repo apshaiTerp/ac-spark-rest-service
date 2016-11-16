@@ -44,6 +44,7 @@ public class SparkRESTApplication extends SpringBootServletInitializer {
     } catch (Throwable t) {
       System.out.println ("Something didn't work...");
       t.printStackTrace();
+      return;
     }
     
     SpringApplication.run(SparkRESTApplication.class, args);
