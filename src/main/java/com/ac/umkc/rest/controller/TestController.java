@@ -38,7 +38,7 @@ public class TestController {
     System.out.println ("*************************************************************************");
     
     //New Approach for RDD
-    JavaRDD<TwitterUser> userRDD = Application.sparkSession.read().textFile("").javaRDD().map(
+    JavaRDD<TwitterUser> userRDD = Application.sparkSession.read().textFile("hdfs://localhost:9321/proj2/userdata.txt").javaRDD().map(
         new Function<String, TwitterUser>() {
           /** It wants it, so I gave it one */
           private static final long serialVersionUID = 5654145143753968626L;
