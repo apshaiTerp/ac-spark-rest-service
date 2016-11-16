@@ -105,7 +105,12 @@
       <artifactId>commons-logging</artifactId>
       <version>1.2</version>
     </dependency> 
-
+		<dependency>
+		  <groupId>org.apache.tomcat</groupId>
+		  <artifactId>tomcat-juli</artifactId>
+		  <version>9.0.0.M11</version>
+		</dependency>
+		
 		<!-- Test Dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
