@@ -39,7 +39,7 @@ public class SparkRESTApplication extends SpringBootServletInitializer {
     
     try {
       System.out.println ("I'm trying to read in the user");
-      sparkSession.read().textFile("hdfs://localhost:9321/proj2/userdata.txt");
+      sparkSession.read().textFile("hdfs://localhost:9000/proj3/userdata.txt");
       System.out.println ("I could read it");
     } catch (Throwable t) {
       System.out.println ("Something didn't work...");
