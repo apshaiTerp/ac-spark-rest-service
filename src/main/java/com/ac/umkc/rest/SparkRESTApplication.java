@@ -15,13 +15,13 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @ComponentScan
 @EnableAutoConfiguration
-public class Application extends SpringBootServletInitializer {
+public class SparkRESTApplication extends SpringBootServletInitializer {
 
   public static SparkSession sparkSession;
   
   @Override
   protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-    return application.sources(Application.class);
+    return application.sources(SparkRESTApplication.class);
   }
   
   /** Main method, which is starting point for service using Spring launcher */
@@ -33,7 +33,7 @@ public class Application extends SpringBootServletInitializer {
         .config("spark.some.config.option", "some-value")
         .getOrCreate();
   
-    SpringApplication.run(Application.class, args);
+    SpringApplication.run(SparkRESTApplication.class, args);
   }
   
   @PreDestroy
