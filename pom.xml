@@ -29,7 +29,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.2.8.RELEASE</version>
+        <version>1.4.1.RELEASE</version>
     </parent>
 
     <properties>
@@ -98,7 +98,6 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>${ac.json.version}</version>
     </dependency>
     <!-- 
     <dependency>
