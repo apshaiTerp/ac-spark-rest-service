@@ -29,7 +29,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.4.2.RELEASE</version>
+        <version>1.2.8.RELEASE</version>
     </parent>
 
     <properties>
@@ -44,7 +44,7 @@
         <ac.spark.version>2.0.0</ac.spark.version>
         <ac.json.version>20160810</ac.json.version>
         
-        <tomcat.version>7.0.72</tomcat.version>
+        <!-- <tomcat.version>7.0.72</tomcat.version>  -->
         
         <!--  Plugin Versions  -->
         <clover.version>3.3.0</clover.version>
@@ -78,8 +78,8 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 		</dependency>
  		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -98,7 +98,9 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
+      <version>${ac.json.version}</version>
     </dependency>
+    <!-- 
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
@@ -109,7 +111,8 @@
 		  <artifactId>tomcat-juli</artifactId>
 		  <version>7.0.72</version>
 		</dependency>
-		
+		 -->
+		 
 		<!-- Test Dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
