@@ -44,6 +44,8 @@
         <ac.spark.version>2.0.0</ac.spark.version>
         <ac.json.version>20160810</ac.json.version>
         
+        <tomcat.version>7.0.52</tomcat.version>
+        
         <!--  Plugin Versions  -->
         <clover.version>3.3.0</clover.version>
         <reports.plugin.version>2.7</reports.plugin.version>
