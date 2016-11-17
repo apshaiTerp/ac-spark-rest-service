@@ -15,7 +15,6 @@ import scala.Serializable;
 import scala.Tuple2;
 
 import com.ac.umkc.rest.SparkRESTApplication;
-import com.ac.umkc.rest.data.SimpleMessageData;
 import com.ac.umkc.spark.data.TwitterUser;
 import com.ac.umkc.spark.util.TupleSorter;
 
@@ -36,7 +35,7 @@ public class TestController implements Serializable {
    * @return
    */
   @RequestMapping(method = RequestMethod.GET, produces="application/json;charset=UTF-8")
-  public Object getTest() {
+  public String getTest() {
     
 
     System.out.println ("*************************************************************************");
@@ -100,7 +99,7 @@ public class TestController implements Serializable {
 
     System.out.println (resultJSON);
 
-    return new SimpleMessageData("Success", "I guess that worked");
+    return resultJSON;
   }
 }
 
