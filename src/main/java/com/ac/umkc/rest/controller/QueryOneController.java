@@ -31,7 +31,7 @@ public class QueryOneController implements Serializable {
    * @return
    */
   @RequestMapping(method = RequestMethod.GET, produces="application/json;charset=UTF-8")
-  public Object getTest() {
+  public Object getQuery1() {
     System.out.println ("*************************************************************************");
     System.out.println ("***************************  Execute Query 1  ***************************");
     System.out.println ("*************************************************************************");
@@ -56,7 +56,7 @@ public class QueryOneController implements Serializable {
       int resultCount = 0;
       for (GoogleData data : results) {
         resultCount++;
-        String line = "{\"location\":\"" + data.getLocation() + "\", \"count\":" + data.getCount() + "}";
+        String line = data.toString();
         System.out.println (line);
         resultJSON += line;
         if (resultCount < results.size()) resultJSON += ",";

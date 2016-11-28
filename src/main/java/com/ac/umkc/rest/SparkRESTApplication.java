@@ -28,6 +28,7 @@ public class SparkRESTApplication {
     
     System.out.println ("My SparkSession appears to be live...");
     
+    /****************************************************************************************
     try {
       System.out.println ("I'm trying to read in the user");
       sparkSession.read().textFile("hdfs://localhost:9000/proj3/userdata.txt");
@@ -37,6 +38,7 @@ public class SparkRESTApplication {
       t.printStackTrace();
       return;
     }
+    ****************************************************************************************/
     
     SpringApplication.run(SparkRESTApplication.class, args);
   }
