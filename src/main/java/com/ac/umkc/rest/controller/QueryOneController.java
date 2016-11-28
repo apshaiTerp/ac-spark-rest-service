@@ -2,23 +2,17 @@ package com.ac.umkc.rest.controller;
 
 import java.util.List;
 
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
-import org.apache.spark.api.java.function.PairFunction;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import scala.Serializable;
-import scala.Tuple2;
 
 import com.ac.umkc.rest.SparkRESTApplication;
 import com.ac.umkc.rest.data.GoogleData;
 import com.ac.umkc.rest.data.SimpleErrorData;
-import com.ac.umkc.spark.data.TwitterUser;
-import com.ac.umkc.spark.util.TupleSorter;
 
 
 /**

@@ -10,7 +10,7 @@ import scala.Serializable;
  *
  */
 @RestController
-@RequestMapping("/query2")
+@RequestMapping("/query3")
 public class QueryThreeController implements Serializable {
 
   /** Gotta have it */
