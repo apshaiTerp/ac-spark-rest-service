@@ -15,6 +15,7 @@ import scala.Serializable;
 import scala.Tuple2;
 
 import com.ac.umkc.rest.SparkRESTApplication;
+import com.ac.umkc.rest.data.GoogleData;
 import com.ac.umkc.rest.data.SimpleErrorData;
 import com.ac.umkc.spark.data.TwitterUser;
 import com.ac.umkc.spark.util.TupleSorter;
@@ -43,50 +44,25 @@ public class QueryOneController implements Serializable {
     
     try {
       //New Approach for RDD
-      JavaRDD<TwitterUser> userRDD = SparkRESTApplication.sparkSession.read().textFile("hdfs://localhost:9000/proj3/userdata.txt").javaRDD().map(
-          new Function<String, TwitterUser>() {
+      JavaRDD<GoogleData> userRDD = SparkRESTApplication.sparkSession.read().textFile("hdfs://localhost:9000/proj3/query1").javaRDD().map(
+          new Function<String, GoogleData>() {
             /** It wants it, so I gave it one */
             private static final long serialVersionUID = 5654145143753968626L;
   
-            public TwitterUser call(String line) throws Exception {
-              TwitterUser user = new TwitterUser();
-              user.parseFromJSON(line);
-              return user;
-            }
-          }).filter(new Function<TwitterUser, Boolean>() {
-            /** It wants it, so I gave it one */
-            private static final long serialVersionUID = -2462072955148041130L;
-  
-            public Boolean call(TwitterUser user) {
-              return user.getLocation().length() > 0;
+            public GoogleData call(String line) throws Exception {
+              GoogleData data = new GoogleData();
+              data.parseFromJSON(line);
+              return data;
             }
           });
       
-      JavaPairRDD<String, Integer> locations = userRDD.mapToPair(new PairFunction<TwitterUser, String, Integer>() {
-        /** Gave it cause it wants one. */
-        private static final long serialVersionUID = 7711668945522265992L;
-  
-            public Tuple2<String, Integer> call(TwitterUser user) {
-              return new Tuple2<String, Integer>(user.getLocation(), 1);
-            }
-        });
+      List<GoogleData> results = userRDD.collect();
       
-      JavaPairRDD<String, Integer> sortLocations = locations.reduceByKey(new Function2<Integer, Integer, Integer>() {
-        /** Gave it cause it wants one. */
-        private static final long serialVersionUID = 1758905397312207150L;
-  
-            public Integer call(Integer i1, Integer i2) {
-              return i1 + i2;
-            }
-        }).sortByKey();
-      
-      List<Tuple2<String, Integer>> results = sortLocations.takeOrdered(10, new TupleSorter());
-  
       String resultJSON = "{\"results\":[";
       int resultCount = 0;
-      for (Tuple2<String, Integer> tuple : results) {
+      for (GoogleData data : results) {
         resultCount++;
-        String line = "{\"location\":\"" + tuple._1() + "\", \"count\":" + tuple._2() + "}";
+        String line = "{\"location\":\"" + data.getLocation() + "\", \"count\":" + data.getCount() + "}";
         System.out.println (line);
         resultJSON += line;
         if (resultCount < results.size()) resultJSON += ",";
