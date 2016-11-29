@@ -108,7 +108,7 @@ public class QueryThreeController implements Serializable {
       resultJSON += "]}";
 
       System.out.println ("-------------------------------------------------------------------------");
-      System.out.println ("-----------------------------  End Query 2  -----------------------------");
+      System.out.println ("-----------------------------  End Query 3  -----------------------------");
       System.out.println ("-------------------------------------------------------------------------");
 
       System.out.println (resultJSON);
