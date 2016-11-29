@@ -79,7 +79,7 @@ public class QueryTwoController implements Serializable {
 
     try {
       //New Approach for RDD
-      JavaRDD<TweetLRData> tweetRDD = SparkRESTApplication.sparkSession.read().textFile("hdfs://localhost:9000/proj3/query1").javaRDD().map(
+      JavaRDD<TweetLRData> tweetRDD = SparkRESTApplication.sparkSession.read().textFile(hdfsPath).javaRDD().map(
           new Function<String, TweetLRData>() {
             /** It wants it, so I gave it one */
             private static final long serialVersionUID = 5654145143753968626L;
