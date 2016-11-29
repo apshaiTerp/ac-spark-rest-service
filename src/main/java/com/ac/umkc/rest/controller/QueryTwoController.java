@@ -37,7 +37,7 @@ public class QueryTwoController implements Serializable {
     //TODO - More Stuff
     try {
       Configuration hdfsConfiguration = new Configuration();
-      //hdfsConfiguration.set("fs.default.name", "hdfs://localhost:9000");
+      hdfsConfiguration.set("fs.default.name", "hdfs://localhost:9000");
       FileSystem hdfs                 = FileSystem.get(hdfsConfiguration);
       
       
