@@ -37,11 +37,12 @@ public class QueryTwoController implements Serializable {
     //TODO - More Stuff
     try {
       Configuration hdfsConfiguration = new Configuration();
+      //hdfsConfiguration.set("fs.default.name", "hdfs://localhost:9000");
       FileSystem hdfs                 = FileSystem.get(hdfsConfiguration);
       
       
-      Path knownFile = new Path("hdfs://localhost:9000/proj3/userdata.txt");
-      Path localFile = new Path("hdfs://localhost:9000/proj3/query2/2016/2017");
+      Path knownFile = new Path("/proj3/userdata.txt");
+      Path localFile = new Path("/proj3/query2/2016/2017");
       if (hdfs.exists(knownFile))
         System.out.println ("I found the known file!");
       else System.out.println ("I could not find the known file.  Boo!");
