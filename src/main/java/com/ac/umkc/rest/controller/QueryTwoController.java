@@ -1,7 +1,12 @@
 package com.ac.umkc.rest.controller;
 
+import java.io.IOException;
+
 import com.ac.umkc.rest.data.SimpleErrorData;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +35,19 @@ public class QueryTwoController implements Serializable {
     System.out.println ("*************************************************************************");
     
     //TODO - More Stuff
-    
+    try {
+      Configuration hdfsConfiguration = new Configuration();
+      FileSystem hdfs                 = FileSystem.get(hdfsConfiguration);
+      
+      Path localFile = new Path("hdfs://localhost:9000/proj3/query2/2016/2017");
+      if (hdfs.exists(localFile))
+        System.out.println ("This path exists!");
+      else System.out.println ("This path does not exist!  We've got to run the query ad-hoc.  :-(");
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     System.out.println ("-------------------------------------------------------------------------");
     System.out.println ("-----------------------------  End Query 2  -----------------------------");
     System.out.println ("-------------------------------------------------------------------------");
