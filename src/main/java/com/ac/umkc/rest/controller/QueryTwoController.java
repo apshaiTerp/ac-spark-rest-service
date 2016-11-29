@@ -59,6 +59,9 @@ public class QueryTwoController implements Serializable {
     }
     
     System.out.println ("Read from Cache: " + readFromCache);
+    
+    String hdfsPath = "http://localhost:9000" + dynamicPath;
+    System.out.println ("HDFS URL: " + hdfsPath);
 
     System.out.println ("-------------------------------------------------------------------------");
     System.out.println ("-----------------------------  End Query 2  -----------------------------");
