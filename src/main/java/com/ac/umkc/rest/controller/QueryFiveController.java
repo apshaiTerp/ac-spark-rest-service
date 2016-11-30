@@ -1,13 +1,28 @@
 package com.ac.umkc.rest.controller;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ac.umkc.rest.data.SimpleErrorData;
-
 import scala.Serializable;
+
+import com.ac.umkc.rest.SparkRESTApplication;
+import com.ac.umkc.rest.data.SimpleErrorData;
+import com.ac.umkc.rest.data.TwitterStatusTopX;
+import com.ac.umkc.spark.data.TwitterStatus;
 
 /**
  * @author AC010168
@@ -25,23 +40,157 @@ public class QueryFiveController implements Serializable {
    * @return
    */
   @RequestMapping(method = RequestMethod.GET, produces="application/json;charset=UTF-8")
-  public Object getQuery5(@RequestParam(value="startdate") String startDate,
-                          @RequestParam(value="enddate") String endDate) {
-    if ((startDate == null) || (startDate.trim().length() == 0))
-      return new SimpleErrorData("Invalid Request", "No startdate was provided.");
-    if ((endDate == null) || (endDate.trim().length() == 0))
-      return new SimpleErrorData("Invalid Request", "No enddate was provided.");
+  public Object getQuery5(@RequestParam(value="search") String searchTerm,
+                          @RequestParam(value="topx", defaultValue="0") int topX) {
+    if ((searchTerm == null) || (searchTerm.trim().length() == 0))
+      return new SimpleErrorData("Invalid Request", "No search was provided.");
+    if (topX <= 0)
+      return new SimpleErrorData("Invalid Request", "No valid topx was provided.");
     
     System.out.println ("*************************************************************************");
     System.out.println ("***************************  Execute Query 5  ***************************");
     System.out.println ("*************************************************************************");
     
-    //TODO - More Stuff
+    boolean readFromCache = false;
+    String altSearchTerm = searchTerm.toLowerCase().replaceAll(" ", "_");
+    String dynamicPath = "/proj3/query5/" + altSearchTerm + "/" + topX;
+    try {
+      Configuration hdfsConfiguration = new Configuration();
+      hdfsConfiguration.set("fs.defaultFS", "hdfs://localhost:9000");
+      FileSystem hdfs                 = FileSystem.get(hdfsConfiguration);
+      
+      Path checkFile = new Path(dynamicPath);
+      if (hdfs.exists(checkFile)) {
+        System.out.println ("I found the known file!");
+        readFromCache = true;
+      } else System.out.println ("I could not find the known file.  Boo!");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     
-    System.out.println ("-------------------------------------------------------------------------");
-    System.out.println ("-----------------------------  End Query 5  -----------------------------");
-    System.out.println ("-------------------------------------------------------------------------");
+    System.out.println ("Read from Cache: " + readFromCache);
+    
+    String hdfsPath = "hdfs://localhost:9000" + dynamicPath;
+    System.out.println ("HDFS URL: " + hdfsPath);
+    
+    if(!readFromCache)
+      executeQuery5(searchTerm, topX, "hdfs://localhost:9000/proj3/tweetdata.txt");
+    
+    try {
+      //New Approach for RDD
+      JavaRDD<TwitterStatusTopX> hashRDD = SparkRESTApplication.sparkSession.read().textFile(hdfsPath).javaRDD().map(
+          new Function<String, TwitterStatusTopX>() {
+            /** It wants it, so I gave it one */
+            private static final long serialVersionUID = 5654145143753968626L;
+  
+            public TwitterStatusTopX call(String line) throws Exception {
+              TwitterStatusTopX data = new TwitterStatusTopX();
+              data.parseFromJSON(line);
+              return data;
+            }
+          });
+      
+      List<TwitterStatusTopX> results = hashRDD.collect();
+      
+      String resultJSON = "{\"results\":[";
+      int resultCount = 0;
+      for (TwitterStatusTopX data : results) {
+        resultCount++;
+        String line = data.toString();
+        System.out.println (line);
+        resultJSON += line;
+        if (resultCount < results.size()) resultJSON += ",";
+      }
+      resultJSON += "]}";
 
-    return new SimpleErrorData("Unimplemented Call", "This call is not yet functional");
+      System.out.println ("-------------------------------------------------------------------------");
+      System.out.println ("-----------------------------  End Query 5  -----------------------------");
+      System.out.println ("-------------------------------------------------------------------------");
+
+      System.out.println (resultJSON);
+
+      return resultJSON;
+
+    } catch (Throwable t) {
+      t.printStackTrace();
+      return new SimpleErrorData("Query Error", "An Unknown Error Occurred: " + t.getMessage());
+    }
+  }
+  
+  /**
+   * Helper method for running and caching the query
+   * @param searchTerm
+   * @param termLimit
+   */
+  @SuppressWarnings("resource")
+  private void executeQuery5(final String searchTerm, int termLimit, String tweetPath) {
+    final String searchFor = searchTerm.toLowerCase();
+    
+    //Open our dataset
+    JavaRDD<TwitterStatus> tweetRDD = SparkRESTApplication.sparkSession.read().textFile(tweetPath).javaRDD().map(
+        new Function<String, TwitterStatus>() {
+          
+          /** It wants it, so I gave it one */
+          private static final long serialVersionUID = 1503107307123339206L;
+
+          public TwitterStatus call(String line) throws Exception {
+            TwitterStatus status = new TwitterStatus();
+            status.parseFromJSON(line);
+            return status;
+          }
+        });
+    
+    Dataset<Row> tweetDF = SparkRESTApplication.sparkSession.createDataFrame(tweetRDD, TwitterStatus.class);
+    tweetDF.createOrReplaceTempView("tweets");
+    
+    Dataset<Row> results = SparkRESTApplication.sparkSession.sql("SELECT userName, statusID, createdDate FROM tweets " + 
+        "WHERE LOWER(filteredText) LIKE '%" + searchFor + "%' ORDER BY createdDate desc");
+    
+    List<Row> topX = results.takeAsList(termLimit);
+    List<TwitterStatusTopX> searchResults = new ArrayList<TwitterStatusTopX>(topX.size());
+    for (Row row : topX) {
+      TwitterStatusTopX tstx = new TwitterStatusTopX();
+      tstx.setUserName(row.getString(0));
+      tstx.setStatusID(row.getLong(1));
+      tstx.setCreatedDate(row.getString(2));
+      
+      /**********************************************************************************
+      //This is where we make our External API call to pull in additional data
+      TwitterStatusExtras extras = TwitterCall.getTweet(tstx.getStatusID());
+      tstx.setStatusText(extras.getStatusText());
+      **********************************************************************************/
+      
+      //Instead, create the dynamic widget which will be used to render the tweet block
+      tstx.setStatusText("https://publish.twitter.com/oembed?url=https://twitter.com/" + tstx.getUserName() + 
+          "/status/" + tstx.getStatusID());
+      
+      searchResults.add(tstx);
+    }
+    
+    //Since the dynamicPath can't have spaces, replace any that might be in the search term
+    //with an underscore
+    String altSearchTerm = searchTerm.toLowerCase().replaceAll(" ", "_");
+    
+    String dynamicPath = "/proj3/query5/" + altSearchTerm + "/" + termLimit;
+    try {
+      Configuration hdfsConfiguration = new Configuration();
+      hdfsConfiguration.set("fs.defaultFS", "hdfs://localhost:9000");
+      FileSystem hdfs                 = FileSystem.get(hdfsConfiguration);
+      
+      Path checkFile = new Path(dynamicPath);
+      if (hdfs.exists(checkFile)) {
+        System.out.println ("I need to purge before writing!");
+        hdfs.delete(checkFile, true);
+      } 
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    String outputPath = "hdfs://localhost:9000" + dynamicPath;
+    JavaSparkContext context = new JavaSparkContext(SparkRESTApplication.sparkSession.sparkContext());
+    JavaRDD<TwitterStatusTopX> resultRDD = context.parallelize(searchResults);
+    resultRDD.saveAsTextFile(outputPath);
+    
+    System.out.println ("Query Results Written to: " + outputPath);
   }
 }

@@ -1,4 +1,8 @@
-package com.ac.umkc.spark.data;
+package com.ac.umkc.rest.data;
+
+import org.json.JSONObject;
+
+import scala.Serializable;
 
 /**
  * Java POJO to represent the results of one of our queries to combine Spark results
@@ -7,8 +11,11 @@ package com.ac.umkc.spark.data;
  * @author AC010168
  *
  */
-public class TwitterStatusTopX {
+public class TwitterStatusTopX implements Serializable {
 
+  /** Adding because it needs it */
+  private static final long serialVersionUID = 4737010945082679500L;
+  
   /** The unique ID for this tweet */
   private long statusID;
   /** The userName who wrote this tweet */
@@ -28,6 +35,29 @@ public class TwitterStatusTopX {
     statusText  = null;
   }
 
+  @Override
+  public String toString() {
+    return "{\"userName\":\"" + userName + "\", \"statusID\":" + statusID + ", \"createdDate\":\"" + createdDate + 
+        "\", \"statusText\":\"" + statusText+ "\"}";
+  }
+  
+  /**
+   * A helper method to parse a JSON String into this object.
+   * 
+   * @param line the JSON record
+   */
+  public void parseFromJSON(String line) {
+    try {
+      JSONObject jsonData = new JSONObject(line);
+      userName    = jsonData.getString("userName");
+      createdDate = jsonData.getString("createdDate");
+      statusText  = jsonData.getString("statusText");
+      statusID    = jsonData.getLong("statusID");
+    } catch (Throwable t) {
+      System.out.println("UNABLE TO PARSE: [" + line + "]");
+    }
+  }
+  
   /**
    * @return the statusID
    */
@@ -81,13 +111,6 @@ public class TwitterStatusTopX {
    * @param statusText the statusText to set
    */
   public void setStatusText(String statusText) {
-    if (statusText == null)
-      this.statusText = null;
-    else {
-      this.statusText = statusText.trim();
-      this.statusText = this.statusText.replace("\\", "\\\\");
-      this.statusText = this.statusText.replace("\"", "\\\"");
-      this.statusText = this.statusText.replace("/", "\\/");
-    }
+    this.statusText = statusText;
   }
 }
