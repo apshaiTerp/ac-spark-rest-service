@@ -182,7 +182,7 @@ public class QueryFourController implements Serializable {
         String line = data.toString();
         System.out.println (line);
         resultJSON += line;
-        if (resultCount < results.size()) resultJSON += ",";
+        if (resultCount < keyList.size()) resultJSON += ",";
       }
       resultJSON += "]}";
 
