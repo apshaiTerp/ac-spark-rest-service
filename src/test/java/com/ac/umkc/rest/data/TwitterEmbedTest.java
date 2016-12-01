@@ -20,10 +20,10 @@ public class TwitterEmbedTest {
       
       System.out.println ("Printing early result: " + result);
       
-      System.out.println ("Has doubleQuotes: " + result.indexOf("\""));
-      
+      //Let's take out the async block call, since it's not working and unnecessary
+      result = result.substring(0, result.indexOf("\n"));
+ 
       //Now we need to sanitize the output before things blow up
-      result = result.replaceAll("\n", "");
       result = result.replaceAll("\b", "");
       result = result.replaceAll("\f", "");
       result = result.replaceAll("\t", "");
