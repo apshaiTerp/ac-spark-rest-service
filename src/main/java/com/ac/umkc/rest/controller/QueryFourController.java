@@ -70,6 +70,9 @@ public class QueryFourController implements Serializable {
     String tempEndDate = endDate.trim();
     if (tempEndDate.length() == 4) tempEndDate += ".01";
     if (tempEndDate.length() == 7) tempEndDate += ".01";
+    
+    System.out.println ("tempStartDate: " + tempStartDate);
+    System.out.println ("tempEndDate:   " + tempEndDate);
 
     Date trueStartDate = null;
     Date trueEndDate   = null;
@@ -139,7 +142,7 @@ public class QueryFourController implements Serializable {
       Map<String, LineGraphData> dateMap = new HashMap<String, LineGraphData>();
       //Build out our list of all days between start and stop, excluding stop
       while (calInc.before(calStop)) {
-        LineGraphData data = new LineGraphData(calInc.get(Calendar.DAY_OF_MONTH), 
+        LineGraphData data = new LineGraphData(calInc.get(Calendar.DATE), 
             calInc.getActualMaximum(Calendar.MONTH), calInc.get(Calendar.YEAR));
         dateMap.put(data.getShortDate(), data);
         calInc.add(Calendar.DATE, 1);
