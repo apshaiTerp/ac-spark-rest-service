@@ -183,8 +183,8 @@ public class QueryFiveController implements Serializable {
       **********************************************************************************/
       
       //Instead, create the dynamic widget which will be used to render the tweet block
-      String requestURL = "https://publish.twitter.com/oembed?url=https://twitter.com/" + tstx.getUserName() + 
-          "/status/" + tstx.getStatusID();
+      String requestURL = "http://65.28.99.247:8080/query5support?name=" + tstx.getUserName() + 
+          "&id=" + tstx.getStatusID();
       tstx.setStatusText(TwitterCall.getEmbedBody(requestURL));
       
       searchResults.add(tstx);
