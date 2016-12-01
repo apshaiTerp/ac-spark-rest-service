@@ -24,6 +24,8 @@ public class TwitterStatusTopX implements Serializable {
   private String createdDate;
   /** The unfiltered text from this tweet */
   private String statusText;
+  /** The user type, which is a new addition */
+  private String userType;
   
   /**
    * Basic Constructor
@@ -33,12 +35,13 @@ public class TwitterStatusTopX implements Serializable {
     userName    = null;
     createdDate = null;
     statusText  = null;
+    userType    = null;
   }
 
   @Override
   public String toString() {
     return "{\"userName\":\"" + userName + "\", \"statusID\":" + statusID + ", \"createdDate\":\"" + createdDate + 
-        "\", \"statusText\":\"" + statusText+ "\"}";
+        "\", \"statusText\":\"" + statusText + "\", \"userType\":\"" + userType+ "\"}";
   }
   
   /**
@@ -53,6 +56,7 @@ public class TwitterStatusTopX implements Serializable {
       createdDate = jsonData.getString("createdDate");
       statusText  = jsonData.getString("statusText");
       statusID    = jsonData.getLong("statusID");
+      userType    = jsonData.getString("userType");
     } catch (Throwable t) {
       System.out.println("UNABLE TO PARSE: [" + line + "]");
     }
@@ -112,5 +116,19 @@ public class TwitterStatusTopX implements Serializable {
    */
   public void setStatusText(String statusText) {
     this.statusText = statusText;
+  }
+
+  /**
+   * @return the userType
+   */
+  public String getUserType() {
+    return userType;
+  }
+
+  /**
+   * @param userType the userType to set
+   */
+  public void setUserType(String userType) {
+    this.userType = userType;
   }
 }

@@ -23,6 +23,7 @@ import com.ac.umkc.rest.SparkRESTApplication;
 import com.ac.umkc.rest.data.SimpleErrorData;
 import com.ac.umkc.rest.data.TwitterStatusTopX;
 import com.ac.umkc.spark.data.TwitterStatus;
+import com.ac.umkc.spark.data.TwitterUser;
 
 /**
  * @author AC010168
@@ -74,7 +75,7 @@ public class QueryFiveController implements Serializable {
     System.out.println ("HDFS URL: " + hdfsPath);
     
     if(!readFromCache)
-      executeQuery5(searchTerm, topX, "hdfs://localhost:9000/proj3/tweetdata.txt");
+      executeQuery5(searchTerm, topX, "hdfs://localhost:9000/proj3/tweetdata.txt", "hdfs://localhost:9000/proj3/userdata.txt");
     
     try {
       //New Approach for RDD
@@ -123,7 +124,7 @@ public class QueryFiveController implements Serializable {
    * @param termLimit
    */
   @SuppressWarnings("resource")
-  private void executeQuery5(final String searchTerm, int termLimit, String tweetPath) {
+  private void executeQuery5(final String searchTerm, int termLimit, String tweetPath, String userPath) {
     final String searchFor = searchTerm.toLowerCase();
     
     //Open our dataset
@@ -143,16 +144,36 @@ public class QueryFiveController implements Serializable {
     Dataset<Row> tweetDF = SparkRESTApplication.sparkSession.createDataFrame(tweetRDD, TwitterStatus.class);
     tweetDF.createOrReplaceTempView("tweets");
     
-    Dataset<Row> results = SparkRESTApplication.sparkSession.sql("SELECT userName, statusID, createdDate FROM tweets " + 
-        "WHERE LOWER(filteredText) LIKE '%" + searchFor + "%' ORDER BY createdDate desc");
+    //New Approach for RDD
+    JavaRDD<TwitterUser> userRDD = SparkRESTApplication.sparkSession.read().textFile(userPath).javaRDD().map(
+        new Function<String, TwitterUser>() {
+          /** It wants it, so I gave it one */
+          private static final long serialVersionUID = 5654145143753968626L;
+
+          public TwitterUser call(String line) throws Exception {
+            TwitterUser user = new TwitterUser();
+            user.parseFromJSON(line);
+            return user;
+          }
+        });
+    
+    Dataset<Row> userDF = SparkRESTApplication.sparkSession.createDataFrame(userRDD, TwitterUser.class);
+    userDF.createOrReplaceTempView("users");
+
+    Dataset<Row> results = SparkRESTApplication.sparkSession.sql("SELECT t.userName, u.userType, t.statusID, t.createdDate " + 
+        "FROM tweets t " + 
+        "JOIN users u " +
+        "ON t.userID = u.twitterID " + 
+        "WHERE LOWER(t.filteredText) LIKE '%" + searchFor + "%' ORDER BY t.createdDate desc");
     
     List<Row> topX = results.takeAsList(termLimit);
     List<TwitterStatusTopX> searchResults = new ArrayList<TwitterStatusTopX>(topX.size());
     for (Row row : topX) {
       TwitterStatusTopX tstx = new TwitterStatusTopX();
       tstx.setUserName(row.getString(0));
-      tstx.setStatusID(row.getLong(1));
-      tstx.setCreatedDate(row.getString(2));
+      tstx.setUserType(row.getString(1));
+      tstx.setStatusID(row.getLong(2));
+      tstx.setCreatedDate(row.getString(3));
       
       /**********************************************************************************
       //This is where we make our External API call to pull in additional data
