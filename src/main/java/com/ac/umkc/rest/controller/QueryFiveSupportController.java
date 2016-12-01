@@ -36,15 +36,14 @@ public class QueryFiveSupportController implements Serializable {
       result = TwitterCall.getEmbedBody(requestURL);
       
       //Now we need to sanitize the output before things blow up
-      result.replaceAll("\n", "");
-      result.replaceAll("\b", "");
-      result.replaceAll("\f", "");
-      result.replaceAll("\t", "");
-      result.replaceAll("\r", "");
+      result = result.replaceAll("\n", "");
+      result = result.replaceAll("\b", "");
+      result = result.replaceAll("\f", "");
+      result = result.replaceAll("\t", "");
+      result = result.replaceAll("\r", "");
       
-      result.replaceAll("\\\\", "\\\\");
-      result.replaceAll("/", "\\/");
-      result.replaceAll("\"", "\\\"");
+      result = result.replaceAll("/", "\\/");
+      result = result.replaceAll("\"", "\\\"");
       
     } catch (Throwable t) {
       t.printStackTrace();
