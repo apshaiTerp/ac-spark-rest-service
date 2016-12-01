@@ -24,6 +24,7 @@ import com.ac.umkc.rest.data.SimpleErrorData;
 import com.ac.umkc.rest.data.TwitterStatusTopX;
 import com.ac.umkc.spark.data.TwitterStatus;
 import com.ac.umkc.spark.data.TwitterUser;
+import com.ac.umkc.spark.util.TwitterCall;
 
 /**
  * @author AC010168
@@ -182,8 +183,9 @@ public class QueryFiveController implements Serializable {
       **********************************************************************************/
       
       //Instead, create the dynamic widget which will be used to render the tweet block
-      tstx.setStatusText("https://publish.twitter.com/oembed?url=https://twitter.com/" + tstx.getUserName() + 
-          "/status/" + tstx.getStatusID());
+      String requestURL = "https://publish.twitter.com/oembed?url=https://twitter.com/" + tstx.getUserName() + 
+          "/status/" + tstx.getStatusID();
+      tstx.setStatusText(TwitterCall.getEmbedBody(requestURL));
       
       searchResults.add(tstx);
     }

@@ -63,5 +63,4 @@ public class SimpleTest {
       fail("Something bad happened: " + t.getMessage());
     }
   }
-
 }
