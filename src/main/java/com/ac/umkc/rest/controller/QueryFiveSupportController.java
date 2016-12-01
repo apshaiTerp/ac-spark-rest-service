@@ -42,8 +42,8 @@ public class QueryFiveSupportController implements Serializable {
       result = result.replaceAll("\t", "");
       result = result.replaceAll("\r", "");
       
-      result = result.replaceAll("/", "\\/");
-      result = result.replaceAll("\"", "\\\"");
+      result = result.replaceAll("/", "\\\\/");
+      result = result.replaceAll("\"", "\\\\\"");
       
     } catch (Throwable t) {
       t.printStackTrace();

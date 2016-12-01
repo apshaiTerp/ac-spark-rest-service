@@ -18,6 +18,10 @@ public class TwitterEmbedTest {
       String oembedURL = "https://publish.twitter.com/oembed?url=https://twitter.com/trzewik/status/799334851447058432";
       String result = TwitterCall.getEmbedBody(oembedURL);
       
+      System.out.println ("Printing early result: " + result);
+      
+      System.out.println ("Has doubleQuotes: " + result.indexOf("\""));
+      
       //Now we need to sanitize the output before things blow up
       result = result.replaceAll("\n", "");
       result = result.replaceAll("\b", "");
@@ -25,8 +29,8 @@ public class TwitterEmbedTest {
       result = result.replaceAll("\t", "");
       result = result.replaceAll("\r", "");
       
-      result = result.replaceAll("/", "\\/");
-      result = result.replaceAll("\"", "\\\"");
+      result = result.replaceAll("/", "\\\\/");
+      result = result.replaceAll("\"", "\\\\\"");
 
       System.out.println ("Mixed Result: " + result);
     } catch (Throwable t) {
