@@ -143,7 +143,7 @@ public class QueryFourController implements Serializable {
       //Build out our list of all days between start and stop, excluding stop
       while (calInc.before(calStop)) {
         LineGraphData data = new LineGraphData(calInc.get(Calendar.DATE), 
-            calInc.getActualMaximum(Calendar.MONTH), calInc.get(Calendar.YEAR));
+            calInc.get(Calendar.MONTH), calInc.get(Calendar.YEAR));
         dateMap.put(data.getShortDate(), data);
         calInc.add(Calendar.DATE, 1);
         
