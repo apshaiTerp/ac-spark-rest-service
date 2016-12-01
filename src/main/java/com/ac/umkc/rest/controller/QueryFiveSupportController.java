@@ -36,9 +36,10 @@ public class QueryFiveSupportController implements Serializable {
       result = TwitterCall.getEmbedBody(requestURL);
       
       //Let's take out the async block call, since it's not working and unnecessary
-      result = result.substring(0, result.indexOf("\n"));
-      
+      result = result.replaceFirst("//platform.twitter.com/widgets.js", "js/widgets.js");
+ 
       //Now we need to sanitize the output before things blow up
+      result = result.replaceAll("\n", "");
       result = result.replaceAll("\b", "");
       result = result.replaceAll("\f", "");
       result = result.replaceAll("\t", "");
