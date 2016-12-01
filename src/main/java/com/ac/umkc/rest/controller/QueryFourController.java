@@ -1,8 +1,15 @@
 package com.ac.umkc.rest.controller;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -20,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import scala.Serializable;
 
 import com.ac.umkc.rest.SparkRESTApplication;
+import com.ac.umkc.rest.data.LineGraphData;
 import com.ac.umkc.rest.data.SimpleErrorData;
 import com.ac.umkc.rest.data.TweetsDayData;
 import com.ac.umkc.spark.data.TwitterStatus;
@@ -36,6 +44,9 @@ public class QueryFourController implements Serializable {
   /** Gotta have it */
   private static final long serialVersionUID = -6957417977131234881L;
 
+  /** Need to help with date assignment */
+  private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd");
+  
   /**
    * 
    * @return
@@ -50,6 +61,28 @@ public class QueryFourController implements Serializable {
       return new SimpleErrorData("Invalid Request", "No startdate was provided.");
     if ((endDate == null) || (endDate.trim().length() == 0))
       return new SimpleErrorData("Invalid Request", "No enddate was provided.");
+    
+    //Verify that our dates are good before starting work
+    String tempStartDate = startDate.trim();
+    if (tempStartDate.length() == 4) tempStartDate += ".01";
+    if (tempStartDate.length() == 7) tempStartDate += ".01";
+    
+    String tempEndDate = endDate.trim();
+    if (tempEndDate.length() == 4) tempEndDate += ".01";
+    if (tempEndDate.length() == 7) tempEndDate += ".01";
+
+    Date trueStartDate = null;
+    Date trueEndDate   = null;
+    try {
+      trueStartDate = formatter.parse(tempStartDate);
+    } catch (Throwable t) {
+      return new SimpleErrorData("Invalid Request", "The provided startdate was not recognized.");
+    }
+    try {
+      trueEndDate = formatter.parse(tempEndDate);
+    } catch (Throwable t) {
+      return new SimpleErrorData("Invalid Request", "The provided enddate was not recognized.");
+    }
     
     System.out.println ("*************************************************************************");
     System.out.println ("***************************  Execute Query 4  ***************************");
@@ -96,10 +129,55 @@ public class QueryFourController implements Serializable {
       
       List<TweetsDayData> results = hashRDD.collect();
       
+      //Now we need to build out our full list of all dates, then fill everything out, allowing for
+      //us to accurately track no tweets
+      Calendar calInc = Calendar.getInstance();
+      calInc.setTime(trueStartDate);
+      Calendar calStop = Calendar.getInstance();
+      calStop.setTime(trueEndDate);
+      
+      Map<String, LineGraphData> dateMap = new HashMap<String, LineGraphData>();
+      //Build out our list of all days between start and stop, excluding stop
+      while (calInc.before(calStop)) {
+        LineGraphData data = new LineGraphData(calInc.get(Calendar.DAY_OF_MONTH), 
+            calInc.getActualMaximum(Calendar.MONTH), calInc.get(Calendar.YEAR));
+        dateMap.put(data.getShortDate(), data);
+        calInc.add(Calendar.DATE, 1);
+        
+        //DEBUG
+        System.out.println ("Adding shortDate: " + data.getShortDate());
+      }
+      
+      //Now loop through all our hits, and find the matching object to increment
+      for (TweetsDayData data : results) {
+        LineGraphData graphData = dateMap.get(data.getShortDate());
+        
+        //DEBUG
+        if (graphData == null) { System.out.println ("I have a problem..."); break; }
+        
+        if (data.getUserType().equalsIgnoreCase("DESIGNER")) 
+          graphData.setDesignerCount(data.getCount());
+        else if (data.getUserType().equalsIgnoreCase("PUBLISHER")) 
+          graphData.setPublisherCount(data.getCount());
+        else if (data.getUserType().equalsIgnoreCase("REVIEWER")) 
+          graphData.setReviewerCount(data.getCount());
+        else if (data.getUserType().equalsIgnoreCase("CONVENTION")) 
+          graphData.setConventionCount(data.getCount());
+        else if (data.getUserType().equalsIgnoreCase("COMMUNITY")) 
+          graphData.setCommunityCount(data.getCount());
+        dateMap.put(data.getShortDate(), graphData);
+      }
+      
+      Set<String> keySet = dateMap.keySet();
+      List<String> keyList = new ArrayList<String>(keySet.size());
+      keyList.addAll(keySet);
+      Collections.sort(keyList);
+      
       String resultJSON = "{\"results\":[";
       int resultCount = 0;
-      for (TweetsDayData data : results) {
+      for (String key : keyList) {
         resultCount++;
+        LineGraphData data = dateMap.get(key);
         String line = data.toString();
         System.out.println (line);
         resultJSON += line;
@@ -110,8 +188,6 @@ public class QueryFourController implements Serializable {
       System.out.println ("-------------------------------------------------------------------------");
       System.out.println ("-----------------------------  End Query 4  -----------------------------");
       System.out.println ("-------------------------------------------------------------------------");
-
-      System.out.println (resultJSON);
 
       return resultJSON;
 
