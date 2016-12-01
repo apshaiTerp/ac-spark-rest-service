@@ -134,10 +134,11 @@ public class QueryFourController implements Serializable {
       
       //Now we need to build out our full list of all dates, then fill everything out, allowing for
       //us to accurately track no tweets
+      Date now = new Date();
       Calendar calInc = Calendar.getInstance();
       calInc.setTime(trueStartDate);
       Calendar calStop = Calendar.getInstance();
-      calStop.setTime(trueEndDate);
+      calStop.setTime(trueEndDate.before(now) ? trueEndDate : now);
       
       Map<String, LineGraphData> dateMap = new HashMap<String, LineGraphData>();
       //Build out our list of all days between start and stop, excluding stop
@@ -146,9 +147,6 @@ public class QueryFourController implements Serializable {
             calInc.get(Calendar.MONTH), calInc.get(Calendar.YEAR));
         dateMap.put(data.getShortDate(), data);
         calInc.add(Calendar.DATE, 1);
-        
-        //DEBUG
-        System.out.println ("Adding shortDate: " + data.getShortDate());
       }
       
       //Now loop through all our hits, and find the matching object to increment
