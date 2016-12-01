@@ -34,6 +34,18 @@ public class QueryFiveSupportController implements Serializable {
     String result = "";
     try {
       result = TwitterCall.getEmbedBody(requestURL);
+      
+      //Now we need to sanitize the output before things blow up
+      result.replaceAll("\n", "");
+      result.replaceAll("\b", "");
+      result.replaceAll("\f", "");
+      result.replaceAll("\t", "");
+      result.replaceAll("\r", "");
+      
+      result.replaceAll("\\", "\\\\");
+      result.replaceAll("/", "\\/");
+      result.replaceAll("\"", "\\\"");
+      
     } catch (Throwable t) {
       t.printStackTrace();
       return new SimpleErrorData("REST API Failure", "Oops: " + t.getMessage());
